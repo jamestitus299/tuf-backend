@@ -6,6 +6,10 @@ const app = express();
 app.use(express.json());
 const port = process.env.PORT || 8080;
 
+app.listen(port, () => {
+  console.log(`App is running at: http://localhost:${port}`);
+});
+
 const connectionString = process.env.CONN_STRING;
 const connection = mysql.createConnection(connectionString);
 
@@ -28,8 +32,6 @@ app.get("/", async (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`App is running at: http://localhost:${port}`);
-});
+
 
 // connection.end();
