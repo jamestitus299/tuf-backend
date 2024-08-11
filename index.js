@@ -4,7 +4,7 @@ const express = require("express");
 
 const app = express();
 app.use(express.json());
-const port = process.env.port;
+const port = process.env.PORT;
 
 const connectionString = process.env.CONN_STRING;
 const connection = mysql.createConnection(connectionString);
