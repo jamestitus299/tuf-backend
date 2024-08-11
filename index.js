@@ -4,7 +4,9 @@ const express = require("express");
 const connectDB = require('./db'); 
 
 const app = express();
+const cors = require('cors');
 app.use(express.json());
+app.use(cors())
 const port = process.env.PORT || 8080;
 
 let connection;
@@ -34,7 +36,7 @@ app.get("/status", async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  const query = "select * from banneritems where expiration_time > now()";
+  const query = "select * from banneritems where expiration_time > now() and is_active = 1";
   connection.query(query, (err, results) => {
     if (err) {
       console.log(err);
