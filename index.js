@@ -1,43 +1,35 @@
-import express from "express";
-import mysql from 'mysql2/promise';
-import {Connector} from '@google-cloud/cloud-sql-connector';
-import dotenv from 'dotenv';
+require('dotenv').config()
 
-dotenv.config();
-
+const mysql = require('mysql2');
+const express = require('express');
 const app = express();
-const port = 3003;
+app.use(express.json())
 
-const instanceConnectionName = process.env.instanceConnectionName;
-const user = process.env.user;
-const password = process.env.password;
-const database = process.env.databaseName;
-
-
-const connector = new Connector();
-const clientOpts = await connector.getOptions({
-  instanceConnectionName: instanceConnectionName,
-  ipType: 'PUBLIC',
-});
-const pool = await mysql.createPool({
-  ...clientOpts,
-  user:  user,
-  password:  password,
-  database:  database,
-});
-const conn = await pool.getConnection();
-const [result] = await conn.query(`SELECT NOW();`);
-console.table(result); // prints returned time value from server
-
-await pool.end();
-connector.close();
-
-
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-});
-
-// start
+// Use port 8080 by default, unless configured differently in Google Cloud
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+   console.log(`App is running at: http://localhost:${port}`);
 });
+
+const pool = mysql.createPool({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  databse: process.env.DB_NAME,
+  socketPath: `/cloudsql/${process.env.INSTANCE_CONN_NAME}`,
+});
+
+// console.log(pool);
+
+app.get('/status', async (req, res) => res.send('Success.') );
+
+app.get('/', async (req, res) => {
+  try {
+    const [rows, fields] = await pool.execute(query);
+    res.json({ data: rows }); // Send the results as JSON
+  } catch (error) {
+    console.error('Error executing query:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
