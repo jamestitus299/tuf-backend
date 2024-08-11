@@ -1,14 +1,13 @@
-require("dotenv").config();
-const mysql = require("mysql2");
 const express = require("express");
 const connectDB = require('./db'); 
+require("dotenv").config();
 
 const app = express();
 const cors = require('cors');
 app.use(express.json());
 app.use(cors())
-const port = process.env.PORT || 8080;
 
+const port = process.env.PORT || 8080;
 let connection;
 
 app.listen(port, async () => {
@@ -27,22 +26,26 @@ app.get("/status", async (req, res) => {
   connection.query(query, (err, results) => {
     if (err) {
       console.log(err);
-      res.json("Internal Error");
+      res.status(500).send("Internal Error");
     }
     if(results){
-      res.json("Success");
+      res.status(200).json("Success");
     }
   });
 });
 
 app.get("/", async (req, res) => {
-  const query = "select * from banneritems where expiration_time > now() and is_active = 1";
+  const query = "select * from banneritems where expiration_time > now() and is_active = 1 order by expiration_time";
   connection.query(query, (err, results) => {
     if (err) {
       console.log(err);
-      res.json({data:[]});
-    }else{
-      res.json(results);
+      res.status(500).json({data:[]});
+    }
+    if(results.length > 0){
+      res.status(200).send(results);
+    }
+    else{
+      res.status(500).send([]);
     }
   });
 });
