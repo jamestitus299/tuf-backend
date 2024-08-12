@@ -51,7 +51,7 @@ app.get("/", async (req, res) => {
 
 app.get("/admin", async (req, res) => {
   const query =
-    "select * from banneritems order by expiration_time";
+    "select * from banneritems where expiration_time > now() order by expiration_time";
   connection.query(query, (err, results) => {
     if (err) {
       console.log(err);
@@ -82,6 +82,46 @@ app.post("/admin/login", async (req, res) => {
     res.status(200).json({ message: "Login successful" });
   });
 });
+
+
+app.post("/admin/banner", async (req, res) => {
+  const { title, description, link, expirationTime, active } = req.body;
+  if (!title || !description || !link || !expirationTime) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+  // const eTime = new Date(expirationTime).toISOString().slice(0, 19).replace('T', ' ');
+  const currentTime = new Date();
+  // console.log(title, description, link, expirationTime, active, currentTime );
+
+  const sql = "insert into banneritems(title, description, link, expiration_time, is_active, created_time ) values(?, ?, ?, ?, ?, ?)";
+  connection.query(sql, [title, description, link, expirationTime, active, currentTime ], (err, results) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ message: "Internal Error" });
+    }
+      return res.status(200).json({ message: 'Banner Created'});
+  });
+});
+
+
+
+app.post("/admin/togglebanner", async (req, res) => {
+
+  const {id, active} = req.body;
+  // console.log(id, active);
+
+  const query = "update banneritems set is_active = ? where id = ?";
+  connection.query(query, [active, id], (err, results) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ message: "Internal Error" });
+    }
+      res.status(200).json({ message: 'Banner Toggled'});
+  });
+});
+
+
+
 
 process.on("SIGINT", async () => {
   if (connection) {
