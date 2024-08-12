@@ -103,6 +103,25 @@ app.post("/admin/banner", async (req, res) => {
   });
 });
 
+app.post("/admin/banner/edit", async (req, res) => {
+
+  const {id, title, description, link, expirationTime } = req.body;
+  // console.log(id, title, description, link );
+
+  if (!title || !description || !link ) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+
+  const query = "update banneritems set title = ?, description = ?, link = ? where id = ?";
+  connection.query(query, [title, description, link, id], (err, results) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ message: "Internal Error" });
+    }
+      // console.log(results);
+      res.status(200).json({ message: 'Banner Edited'});
+  });
+});
 
 
 app.post("/admin/togglebanner", async (req, res) => {
@@ -119,6 +138,8 @@ app.post("/admin/togglebanner", async (req, res) => {
       res.status(200).json({ message: 'Banner Toggled'});
   });
 });
+
+
 
 
 
