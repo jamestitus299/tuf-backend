@@ -9,6 +9,7 @@ app.use(cors());
 
 const port = process.env.PORT || 8080;
 let connection;
+const istOffset = 5.5 * 60 * 60 * 1000; 
 
 app.listen(port, async () => {
   try {
@@ -35,8 +36,11 @@ app.get("/status", async (req, res) => {
 
 app.get("/", async (req, res) => {
   const query =
-    "select * from banneritems where expiration_time > now() and is_active = 1 order by expiration_time";
-  connection.query(query, (err, results) => {
+    "select * from banneritems where expiration_time > ? and is_active = 1 order by expiration_time";
+    const now = new Date();
+    const currTime = new Date(now.getTime() + istOffset);
+    // console.log(currTime);
+    connection.query(query, [currTime],  (err, results) => {
     if (err) {
       console.log(err);
       res.status(500).json({ data: [] });
@@ -51,8 +55,10 @@ app.get("/", async (req, res) => {
 
 app.get("/admin", async (req, res) => {
   const query =
-    "select * from banneritems where expiration_time > now() order by expiration_time";
-  connection.query(query, (err, results) => {
+    "select * from banneritems where expiration_time > ? order by expiration_time";
+    const now = new Date();
+    const currTime = new Date(now.getTime() + istOffset);
+  connection.query(query, [currTime], (err, results) => {
     if (err) {
       console.log(err);
       res.status(500).json({ data: [] });
@@ -84,7 +90,7 @@ app.post("/admin/login", async (req, res) => {
 });
 
 
-app.post("/admin/banner", async (req, res) => {
+app.post("/admin/banner", async (req, res) => { 
   const { title, description, link, expirationTime, active } = req.body;
   if (!title || !description || !link || !expirationTime) {
     return res.status(400).json({ message: "Missing fields" });
