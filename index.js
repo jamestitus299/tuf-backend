@@ -93,8 +93,8 @@ app.post("/admin/banner", async (req, res) => {
   const currentTime = new Date();
   // console.log(title, description, link, expirationTime, active, currentTime );
 
-  const sql = "insert into banneritems(title, description, link, expiration_time, is_active, created_time ) values(?, ?, ?, ?, ?, ?)";
-  connection.query(sql, [title, description, link, expirationTime, active, currentTime ], (err, results) => {
+  const sql = "insert into banneritems(title, description, link, expiration_time, is_active) values(?, ?, ?, ?, ?)";
+  connection.query(sql, [title, description, link, expirationTime, active], (err, results) => {
     if (err) {
       console.log(err);
       res.status(500).json({ message: "Internal Error" });
